@@ -26,25 +26,6 @@
 #include <twist_mux/utils.h>
 #include <twist_mux/xmlrpc_helpers.h>
 
-/**
- * @brief hasIncreasedAbsVelocity Check if the absolute velocity has increased
- * in any of the components: linear (abs(x)) or angular (abs(yaw))
- * @param old_twist Old velocity
- * @param new_twist New velocity
- * @return true is any of the absolute velocity components has increased
- */
-bool hasIncreasedAbsVelocity(const geometry_msgs::Twist& old_twist, const geometry_msgs::Twist& new_twist)
-{
-  const auto old_linear_x = std::abs(old_twist.linear.x);
-  const auto new_linear_x = std::abs(new_twist.linear.x);
-
-  const auto old_angular_z = std::abs(old_twist.angular.z);
-  const auto new_angular_z = std::abs(new_twist.angular.z);
-
-  return (old_linear_x  < new_linear_x ) ||
-         (old_angular_z < new_angular_z);
-}
-
 namespace twist_mux
 {
 
