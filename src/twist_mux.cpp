@@ -66,7 +66,7 @@ void TwistMux::updateDiagnostics(const ros::TimerEvent& event)
 
 void TwistMux::publishTwist(const geometry_msgs::TwistConstPtr& msg)
 {
-  if(filterBackwardMovement() && msg->linear.x >= 0.0) return;
+  if(filterBackwardMovement() && msg->linear.x > 0.0) return;
 
   cmd_pub_.publish(*msg);
 }
