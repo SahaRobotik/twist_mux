@@ -37,8 +37,11 @@ TwistMux::TwistMux(int window_size)
   /// Get topics and locks:
   velocity_hs_ = boost::make_shared<velocity_topic_container>();
   lock_hs_     = boost::make_shared<lock_topic_container>();
+  backward_filter_hs_  = boost::make_shared<backward_filter_topic_container>();
+
   getTopicHandles(nh, nh_priv, "topics", *velocity_hs_);
   getTopicHandles(nh, nh_priv, "locks" , *lock_hs_ );
+  getTopicHandles(nh, nh_priv, "backward_filters" , *backward_filter_hs_ );
 
   /// Publisher for output topic:
   cmd_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel_out", 1);
