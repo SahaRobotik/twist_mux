@@ -58,6 +58,8 @@ public:
 
   bool hasPriority(const VelocityTopicHandle& twist);
 
+  bool filterBackwardMovement();
+
   void publishTwist(const geometry_msgs::TwistConstPtr& msg);
 
   void updateDiagnostics(const ros::TimerEvent& event);

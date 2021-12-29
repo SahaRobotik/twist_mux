@@ -147,4 +147,17 @@ bool TwistMux::hasPriority(const VelocityTopicHandle& twist)
   return twist.getName() == velocity_name;
 }
 
+bool TwistMux::filterBackwardMovement()
+{
+    for(const auto& backward_filter_h : *backward_filter_hs_)
+    {
+        if(backward_filter_h.isLocked())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 } // namespace twist_mux
