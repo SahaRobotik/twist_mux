@@ -51,11 +51,16 @@ public:
   // @todo alternatively we do the following:
   typedef std::list<VelocityTopicHandle> velocity_topic_container;
   typedef std::list<LockTopicHandle>     lock_topic_container;
+  typedef std::list<LockTopicHandle>     backward_filter_topic_container;
+  typedef std::list<LockTopicHandle>     forward_filter_topic_container;
 
   TwistMux(int window_size = 10);
   ~TwistMux();
 
   bool hasPriority(const VelocityTopicHandle& twist);
+
+  bool filterBackwardMovement();
+  bool filterForwardMovement();
 
   void publishTwist(const geometry_msgs::TwistConstPtr& msg);
 
@@ -81,6 +86,8 @@ protected:
   //handle_container<LockTopicHandle> lock_hs_;
   boost::shared_ptr<velocity_topic_container> velocity_hs_;
   boost::shared_ptr<lock_topic_container>     lock_hs_;
+  boost::shared_ptr<backward_filter_topic_container>  backward_filter_hs_;
+  boost::shared_ptr<forward_filter_topic_container>   forward_filter_hs_;
 
   ros::Publisher cmd_pub_;
 

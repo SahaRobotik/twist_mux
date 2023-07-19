@@ -56,8 +56,13 @@ TwistMux::TwistMux(int window_size)
   /// Get topics and locks:
   velocity_hs_ = boost::make_shared<velocity_topic_container>();
   lock_hs_     = boost::make_shared<lock_topic_container>();
+  backward_filter_hs_  = boost::make_shared<backward_filter_topic_container>();
+  forward_filter_hs_  = boost::make_shared<forward_filter_topic_container>();
+
   getTopicHandles(nh, nh_priv, "topics", *velocity_hs_);
   getTopicHandles(nh, nh_priv, "locks" , *lock_hs_ );
+  getTopicHandles(nh, nh_priv, "backward_filters" , *backward_filter_hs_ );
+  getTopicHandles(nh, nh_priv, "forward_filters" , *forward_filter_hs_ );
 
   /// Publisher for output topic:
   cmd_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel_out", 1);
@@ -82,6 +87,19 @@ void TwistMux::updateDiagnostics(const ros::TimerEvent& event)
 
 void TwistMux::publishTwist(const geometry_msgs::TwistConstPtr& msg)
 {
+  if(filterBackwardMovement() && msg->linear.x > 0.0)
+  {
+    geometry_msgs::Twist zmsg;
+    cmd_pub_.publish(zmsg);
+    return;
+  }
+  if (filterForwardMovement() && msg->linear.x < 0.0)
+  {
+    geometry_msgs::Twist zmsg;
+    cmd_pub_.publish(zmsg);
+    return;
+  }
+
   cmd_pub_.publish(*msg);
 }
 
@@ -162,5 +180,32 @@ bool TwistMux::hasPriority(const VelocityTopicHandle& twist)
 
   return twist.getName() == velocity_name;
 }
+
+bool TwistMux::filterBackwardMovement()
+{
+    for(const auto& backward_filter_h : *backward_filter_hs_)
+    {
+        if(backward_filter_h.isLocked())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool TwistMux::filterForwardMovement()
+{
+    for(const auto& forward_filter_h : *forward_filter_hs_)
+    {
+        if(forward_filter_h.isLocked())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
 } // namespace twist_mux
