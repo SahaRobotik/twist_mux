@@ -65,6 +65,8 @@ public:
 
   using velocity_topic_container = handle_container<VelocityTopicHandle>;
   using lock_topic_container = handle_container<LockTopicHandle>;
+  using backward_filter_topic_container = handle_container<LockTopicHandle>;
+  using forward_filter_topic_container = handle_container<LockTopicHandle>;
 
   TwistMux();
   ~TwistMux() = default;
@@ -72,6 +74,8 @@ public:
   void init();
 
   bool hasPriority(const VelocityTopicHandle & twist);
+  bool filterBackwardMovement();
+  bool filterForwardMovement();
 
   void publishTwist(const geometry_msgs::msg::Twist::ConstSharedPtr & msg);
 
@@ -93,6 +97,8 @@ protected:
    */
   std::shared_ptr<velocity_topic_container> velocity_hs_;
   std::shared_ptr<lock_topic_container> lock_hs_;
+  std::shared_ptr<backward_filter_topic_container> backward_filter_hs_;
+  std::shared_ptr<forward_filter_topic_container> forward_filter_hs_;
 
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_pub_;
 
