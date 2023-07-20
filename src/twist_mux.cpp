@@ -80,8 +80,12 @@ void TwistMux::init()
   /// Get topics and locks:
   velocity_hs_ = std::make_shared<velocity_topic_container>();
   lock_hs_ = std::make_shared<lock_topic_container>();
+  backward_filter_hs_ = std::make_shared<lock_topic_container>();
+  forward_filter_hs_ = std::make_shared<lock_topic_container>();
   getTopicHandles("topics", *velocity_hs_);
   getTopicHandles("locks", *lock_hs_);
+  getTopicHandles("backward_filters", *backward_filter_hs_);
+  getTopicHandles("forward_filters", *forward_filter_hs_);
 
   /// Publisher for output topic:
   cmd_pub_ =
@@ -109,6 +113,19 @@ void TwistMux::updateDiagnostics()
 
 void TwistMux::publishTwist(const geometry_msgs::msg::Twist::ConstSharedPtr & msg)
 {
+  if(filterBackwardMovement() && msg->linear.x > 0.0)
+  {
+    geometry_msgs::msg::Twist zmsg;
+    cmd_pub_->publish(zmsg);
+    return;
+  }
+  if (filterForwardMovement() && msg->linear.x < 0.0)
+  {
+    geometry_msgs::msg::Twist zmsg;
+    cmd_pub_->publish(zmsg);
+    return;
+  }
+
   cmd_pub_->publish(*msg);
 }
 
@@ -187,4 +204,30 @@ bool TwistMux::hasPriority(const VelocityTopicHandle & twist)
   return twist.getName() == velocity_name;
 }
 
-}  // namespace twist_mux
+bool TwistMux::filterBackwardMovement()
+{
+
+      for(const auto& backward_filter_h : *backward_filter_hs_)
+      {
+          if(backward_filter_h.isLocked())
+          {
+              return true;
+          }
+      }
+
+    return false;
+}
+
+bool TwistMux::filterForwardMovement()
+{
+      for(const auto& forward_filter_h : *forward_filter_hs_)
+      {
+          if(forward_filter_h.isLocked())
+          {
+              return true;
+          }
+      }
+    return false;
+}
+
+} // namespace twist_mux
